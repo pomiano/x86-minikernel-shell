@@ -5,10 +5,15 @@ ORG 0x7C00
 msg db 'Hello world!', 0x0D, 0x0A, 0x0 ; 0x0D - carriage return, 0x0A -line feed
 
 mov ax, 0
+
+;set segment registers
 mov ds, ax
 mov es, ax
+mov fs, ax
+mov gs, ax
 mov ss, ax
-mov sp, 0x7000
+
+mov sp, 0x7B00
 
 mov si, msg
 mov ah, 0xE
@@ -36,6 +41,7 @@ mov dh, 0
 mov es, 0x7E00
 mov bx, 0x0000 ; es:bx
 
+sti
 int 0x13
 
 ;todo sprawdzenie sukcesu
