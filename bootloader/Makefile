@@ -3,3 +3,6 @@ all:
 
 clean:
 	rm -f /bin/boot.bin
+
+qemu:
+	qemu-system-x86_64 -hda ./bin/boot.bin
