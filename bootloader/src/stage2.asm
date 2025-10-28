@@ -13,7 +13,7 @@ call write_message
     ;ustawienie bitu PE w rejestrze CR0
 ;uruchomienie kernela - skok do tego adresu
 
-; cli
+cli
 
 ;check A20
 check:
@@ -115,5 +115,95 @@ done:
     ret
 
 finish:
+
+
+tss32_start:
+    dw 0 , 0 ;link , reserved
+    dd 0 ; ESP0
+    dw 0 , 0 ;SS0 , reserved
+    dd 0 ; ESP1
+    dw 0 , 0 ;SS1 , reserved
+    dd 0 ; ESP2
+    dw 0 , 0 ;SS2 , reserved
+    dd 0 ; CR3
+    dd 0,0 ; EIP,EFLAGS
+    dd 0,0,0,0,0,0,0,0 ;EAX,ECX,EDX,EBX,ESP,EBP,ESI,EDI
+    dw 0 , 0 ; ES,reserved
+    dw 0 , 0 ; CS,reserved
+    dw 0 , 0 ; SS,reserved
+    dw 0 , 0 ; DS,reserved
+    dw 0 , 0 ; FS,reserved
+    dw 0 , 0 ; GS,reserved
+    dw 0 , 0 ; LDTR, reserved
+    dw 0 ,0 ; reserved, IOPB
+    dd 0 ; SSP(shadow stack pointer)
+
+tss32_end:
+ 
+
+gdt_start:                                                                                                                          
+
+gdt_null:  dq 0 
+
+
+gdt_kernel_code:
+    dw 0xFFFF ;limit 0-15
+    dw 0x0 ;base 0-15
+    db 0x0 ;base 16-23
+    db 0x9A ;access byte 0-7
+    db 0xCF ;flags and limit 16-19
+    db 0x0 ;base 24-31
+
+gdt_kenel_data:
+    dw 0xFFFF ;limit 0-15
+    dw 0x0 ;base 0-15
+    db 0x0 ;base 16-23
+    db 0x92 ;access byte 0-7
+    db 0xCF ;flags and limit 16-19
+    db 0x0 ;base 24-31
+
+gdt_user_code:
+    dw 0xFFFF ;limit 0-15
+    dw 0x0 ;base 0-15
+    db 0x0 ;base 16-23
+    db 0xFA ;access byte 0-7
+    db 0xCF ;flags and limit 16-19
+    db 0x0 ;base 24-31
+
+gdt_user_data:
+    dw 0xFFFF ;limit 0-15
+    dw 0x0 ;base 0-15
+    db 0x0 ;base 16-23
+    db 0xF2 ;access byte 0-7
+    db 0xCF ;flags and limit 16-19
+    db 0x0 ;base 24-31
+
+gdt_tss:
+    li12 dw 0xFFFF ;limit 0-15
+    bs12 dw 0x0 ;base 0-15
+    bs3 db 0x0 ;base 16-23
+    db 0x89  ;access byte 0-7
+    db 0xCF ;flags and limit 16-19
+    bs4 db 0x0 ;base 24-31
+
+gdt_end:
+
+;base
+mov ax, ds
+shl ax, 4
+add ax, tss32_start
+
+mov bs12, ax ;base 0-15
+
+;limit
+mov ax, tss32_end-tss32_start-1
+mov li12, ax
+
+gdtr:
+    dw gdt_end - gdt_start - 1 ;limit
+    dd gdt ;base
+
+lgdt [gdtr] ;trzeba uporzadkowac
+
 
 times 2048 - ($ - $$) db 0
