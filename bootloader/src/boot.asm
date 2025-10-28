@@ -24,10 +24,12 @@ mov ax, 0x07E0
 mov es, ax
 
 mov ah, 2
-mov al, 1
+mov al, 4
 mov ch, 0
 mov cl, 2
 mov dh, 0
+
+mov dl, 0x80 ;boot from hard drive
 
 mov bx, 0x0000 ; es:bx
 
