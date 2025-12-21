@@ -2,10 +2,6 @@ BITS 16
 ORG 0x7E00
 
 
-mov si, msg 
-call write_message
-
-
 ;wlaczenie A20
 ;przejscie do protected mode
     ;wylaczyc cli
@@ -13,54 +9,99 @@ call write_message
     ;ustawienie bitu PE w rejestrze CR0
 ;uruchomienie kernela - skok do tego adresu
 
-cli
+_start:
+    mov [BOOT_DRIVE], dl
+    mov si, msg_welcome
+    call write_message
+
+    call load_kernel
+
+    cli
+    call checkA20 ;check and activate if it isnt
+    call init_tss_descriptor
+    call setPE
+
+    jmp 0x08:protected_mode_entry
+
+
+;--------------------------------------------
+load_kernel:
+    xor ax, ax          ; ah = 0x00 (reset)
+    mov dl, [BOOT_DRIVE]
+    int 0x13
+
+    mov ax, 0x1000
+    mov es, ax
+    mov bx, 0x0000
+
+    mov ah, 0x02
+    mov al, 1
+    mov ch, 0       
+    mov dh, 0   
+    mov cl, 6   
+    mov dl, [BOOT_DRIVE]
+
+    int 0x13
+    jc disk_error
+    ; jnc disk_good
+    ret
+
+disk_error:
+    mov si, msg_disk_err
+    call write_message
+    hlt
+    jmp disk_error
+
+; disk_good:
+;     mov si, msg_disk
+;     call write_message
+;     ret
 
 ;check A20
-check:
+checkA20:
+    xor ax, ax
+    mov es, ax          ; ES = 0x0000 -> adres 0x00000
+    mov si, 0
 
-xor ax, ax
-mov es, ax          ; ES = 0x0000 -> adres 0x00000
-mov si, 0
+    mov ax, 0xFFFF
+    mov gs, ax          ; GS = 0xFFFF -> adres 0xFFFF0
+    mov di, 0x0010      ; +0x10 = 0x100000
 
-mov ax, 0xFFFF
-mov gs, ax          ; GS = 0xFFFF -> adres 0xFFFF0
-mov di, 0x0010      ; +0x10 = 0x100000
+    mov ah, byte [es:si]
+    push ax
 
-mov ah, byte [es:si]
-push ax
+    mov ah, byte [gs:si]
+    push ax
 
-mov ah, byte [gs:si]
-push ax
+    mov byte [es:si], 0x01
+    mov byte [gs:di], 0x0A
 
-mov byte [es:si], 0x01
-mov byte [gs:di], 0x0A
+    cmp byte [gs:di], 0x01
 
-cmp byte [gs:di], 0x01
+    pop ax
+    mov byte [gs:si], ah
 
-pop ax
-mov byte [gs:si], ah
+    pop ax
+    mov byte [es:si], ah
+    jnz A20_active
 
-pop ax
-mov byte [es:si], ah
-jnz A20_active
+    
+    mov si, msg_A20_notactive
+    call write_message
 
-
-mov si, msg_A20_notactive
-call write_message
-
-jmp finish
 
 ; activate_A20:
 
 
 ; call a20wait_write
 ; mov al, 0xAD 
-; out 0x64, al ;keyboard off
+; out 0x64, al ; keyboard off
 
 ; mov al, 0xD0
 ; out 0x64, al 
 
-; in al, 0x60  ; Read Controller Output Port 
+; call a20wait_read
+; in al, 0x60  ; read Controller Output Port 
 
 ; or al, 0x02  ; activate A20
 ; mov bl,al 
@@ -72,7 +113,7 @@ jmp finish
 ; out 0x60, al
 
 ; mov al, 0xAE
-; out 0x64, al ;keyboard on
+; out 0x64, al ; keyboard on
 
 ; jmp A20_active
 
@@ -89,17 +130,18 @@ jmp finish
 ;     ret
 
 A20_active:
+    mov si, msg_A20_active
+    call write_message
+    ret
 
-mov si, msg_A20_active
-call write_message
 
-jmp finish
-
-msg db 'Hello stage 2!', 0x0D, 0x0A, 0x0; 0x0D - carriage return, 0x0A -line feed
+;DANE
+msg_welcome db 'Hello stage 2!', 0x0D, 0x0A, 0x0; 0x0D - carriage return, 0x0A -line feed
 msg_A20_active db 'A20 is active!', 0x0D, 0x0A, 0x0
 msg_A20_notactive db 'A20 is not active!', 0x0D, 0x0A, 0x0
-
-
+msg_disk db 'Dziala dobrze', 0x0D, 0x0A, 0x0
+msg_disk_err db 'Blad z dyskiem', 0x0D, 0x0A, 0x0
+BOOT_DRIVE db 0
 
 write_message:
 mov ah, 0xE
@@ -114,8 +156,31 @@ done:
     cli
     ret
 
-finish:
+; get_memory_map:
+; sti
+; MEM_MAP equ 0x500
+; ENTRY_SIZE equ 24
 
+; start:
+; mov es, 0
+; mov di, MEM_MAP 
+
+; mov ebx, 0
+; mov edx, 0x534D4150 ;magic number
+; next:
+; mov eax, 0xE820
+; mov ecx, ENTRY_SIZE
+
+; int 0x15
+
+; jc done_memory_map
+; test ebx,ebx
+; jz done_memory_map
+; add di, ENTRY_SIZE
+; jmp next
+
+
+; done_memory_map:
 
 tss32_start:
     dw 0 , 0 ;link , reserved
@@ -137,7 +202,6 @@ tss32_start:
     dw 0 , 0 ; LDTR, reserved
     dw 0 ,0 ; reserved, IOPB
     dd 0 ; SSP(shadow stack pointer)
-
 tss32_end:
  
 
@@ -154,7 +218,7 @@ gdt_kernel_code:
     db 0xCF ;flags and limit 16-19
     db 0x0 ;base 24-31
 
-gdt_kenel_data:
+gdt_kernel_data:
     dw 0xFFFF ;limit 0-15
     dw 0x0 ;base 0-15
     db 0x0 ;base 16-23
@@ -179,31 +243,75 @@ gdt_user_data:
     db 0x0 ;base 24-31
 
 gdt_tss:
-    li12 dw 0xFFFF ;limit 0-15
-    bs12 dw 0x0 ;base 0-15
-    bs3 db 0x0 ;base 16-23
+    li dw 0x0067 ;limit 0-15
+    bs dw 0x0 ;base 0-15
+    bs2 db 0x0 ;base 16-23
     db 0x89  ;access byte 0-7
-    db 0xCF ;flags and limit 16-19
-    bs4 db 0x0 ;base 24-31
+    db 0x00 ;flags and limit 16-19
+    bs3 db 0x0 ;base 24-31
 
 gdt_end:
 
+gdtr:
+    dw gdt_end - gdt_start - 1 ;limit
+    dd gdt_start ;base
+
+
+init_tss_descriptor:
 ;base
 mov ax, ds
 shl ax, 4
 add ax, tss32_start
 
-mov bs12, ax ;base 0-15
+mov [bs], ax ;base 0-15
+
+
+mov ebx, eax
+shr ebx, 16
+mov [bs2], bl           ; base 16-23
+shr ebx, 8
+mov [bs3], bl           ; base 24-31
 
 ;limit
 mov ax, tss32_end-tss32_start-1
-mov li12, ax
+mov [li], ax
 
-gdtr:
-    dw gdt_end - gdt_start - 1 ;limit
-    dd gdt ;base
 
 lgdt [gdtr] ;trzeba uporzadkowac
+
+
+setPE:
+    mov eax, cr0
+    or eax, 1          ; set 0 bit = PE
+    mov cr0, eax
+    ret
+
+
+[BITS 32]
+
+protected_mode_entry:
+    mov ax, 0x10        ; kernel data
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
+
+    mov esp, 0x90000
+
+    ; kopiowanie kernela pod adres 100000
+    cld
+    mov esi, 0x10000 ;skad 
+    mov edi, 0x100000 ;dokąd
+    mov ecx, 6400
+
+    rep movsd
+
+    jmp 0x100000
+
+    cli
+    hlt
+
 
 
 times 2048 - ($ - $$) db 0

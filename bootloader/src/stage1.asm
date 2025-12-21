@@ -1,4 +1,3 @@
-;https://wiki.osdev.org/Real_mode_assembly_I and https://www.ctyme.com/intr/rb-0106.htm and chat.gpt
 BITS 16
 ORG 0x7C00
 
@@ -34,6 +33,7 @@ mov dl, 0x80 ;boot from hard drive
 mov bx, 0x0000 ; es:bx
 
 sti
+
 int 0x13
 
 jc disk_error 
