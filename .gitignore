@@ -1,0 +1,13 @@
+*.o
+*.bin
+*.img
+*.elf
+*.iso
+bin/
+build/
+plan/
+
+.DS_Store
+Thumbs.db
+.vscode/
+*.swp
