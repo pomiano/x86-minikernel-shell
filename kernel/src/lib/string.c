@@ -12,14 +12,14 @@ int strcmp(char str1[], char str2[]) {
 void to_string(int numb, char * buffer) {
     int i =0;
     if(numb==0) 
-        buffer[i] = 0;
+        buffer[i++] = '0';
     else {
         while(numb>0){
-            buffer[i] = (numb % 10) + '0';
+            buffer[i++] = (numb % 10) + '0';
             numb/=10;
         }
     }
-    buffer[i]='/0';
+    buffer[i]='\0';
     reverse(buffer);
 
 }
@@ -36,6 +36,6 @@ void reverse(char s[]) {
 
 int strlen(char s[]) {
     int i;
-    for(int i =0; s[i];i++) {}
+    for(i =0; s[i];i++) {}
     return i;
 }

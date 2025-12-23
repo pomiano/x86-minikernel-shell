@@ -18,8 +18,8 @@ void print_time() {
     minute = (minute & 0x0F) + ((minute >> 4) * 10);
     hour = (hour & 0x0F) + ((hour >> 4) * 10);
 
-    day = day * 10;
-    month = month * 10;
+    day = (day & 0x0F) + ((day >> 4) * 10);
+    month = (month & 0x0F) + ((month >> 4) * 10);
     year = (year & 0x0F) + ((year >> 4) * 10);
 
     char sec[3];
@@ -37,19 +37,29 @@ void print_time() {
     char mon[3];
     to_string(month, mon);
 
-    char yea[3];
+    char yea[5];
     to_string(2000+year, yea);
 
+    if(day<10)
+        print_char('0', 0x0F);
     print_string(d, 0x0F);
     print_char('-', 0x0F);
+    if(month<10)
+        print_char('0', 0x0F);
     print_string(mon, 0x0F);
     print_char('-', 0x0F);
     print_string(yea, 0x0F);
-    print_string("   ", 0x0F);
+    print_string(" | ", 0x0F);
+    if(hour<10)
+        print_char('0', 0x0F);
     print_string(hou, 0x0F);
     print_char(':', 0x0F);
+    if(min<10)
+        print_char('0', 0x0F);
     print_string(min, 0x0F);
     print_char(':', 0x0F);
+    if(sec<10)
+        print_char('0', 0x0F);
     print_string(sec, 0x0F);
 
 }
