@@ -10,20 +10,23 @@
 
 
 void kernel_main(void) {
-    clear_screen();
+    idt_init();
+    init_screen();
+    init_shell();
+    init_keyboard();  
+
     print_string("Inicjalizacja IDT...\n", 0x07);
-    idt_init();     
-    
     print_string("Inicjalizacja Klawiatury...\n", 0x07);
-    init_keyboard();
-
-    print_string("Wlaczanie przerwan (STI)...\n", 0x07);
-    __asm__ volatile ("sti");
+    print_string("Wlaczanie przerwan...\n\n", 0x07);
     print_string("WITAJ W milOS!!\n", 0x07);
-  
 
+    __asm__ volatile ("sti");
+
+    
 
     while(1) {
         __asm__ volatile ("hlt");
     }
+
+
 }

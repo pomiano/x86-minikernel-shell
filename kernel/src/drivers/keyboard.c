@@ -4,9 +4,7 @@
 #include "../include/kernel.h"
 #include "../include/shell.h"
 
-typedef int bool;
-#define true 1
-#define false 0
+
 
 static bool capslock_active = false;
 

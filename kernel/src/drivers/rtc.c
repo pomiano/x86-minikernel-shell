@@ -5,7 +5,7 @@ uint8_t get_rtc_register(int reg){
     return inb(0x71);
 }
 
-void print_time() {
+void print_time(int colour) {
     //podane wartosci sa w hex, ale decymalnie czyli 0x35 oznacza 35 min
     uint8_t second = get_rtc_register(0x00);
     uint8_t minute = get_rtc_register(0x02);
@@ -41,25 +41,25 @@ void print_time() {
     to_string(2000+year, yea);
 
     if(day<10)
-        print_char('0', 0x0F);
-    print_string(d, 0x0F);
-    print_char('-', 0x0F);
+        print_char('0', colour);
+    print_string(d, colour);
+    print_char('-', colour);
     if(month<10)
-        print_char('0', 0x0F);
-    print_string(mon, 0x0F);
-    print_char('-', 0x0F);
-    print_string(yea, 0x0F);
-    print_string(" | ", 0x0F);
+        print_char('0', colour);
+    print_string(mon, colour);
+    print_char('-', colour);
+    print_string(yea, colour);
+    print_string(" | ", colour);
     if(hour<10)
-        print_char('0', 0x0F);
-    print_string(hou, 0x0F);
-    print_char(':', 0x0F);
+        print_char('0', colour);
+    print_string(hou, colour);
+    print_char(':', colour);
     if(min<10)
-        print_char('0', 0x0F);
-    print_string(min, 0x0F);
-    print_char(':', 0x0F);
+        print_char('0', colour);
+    print_string(min, colour);
+    print_char(':', colour);
     if(sec<10)
-        print_char('0', 0x0F);
-    print_string(sec, 0x0F);
+        print_char('0', colour);
+    print_string(sec, colour);
 
 }
