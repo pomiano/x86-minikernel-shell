@@ -31,6 +31,8 @@ void clear_current_line(int colour) {
         video[i]= ' ';
         video[i+1] = colour;
     }
+    cursor_x = 0;
+    update_cursor(cursor_x, cursor_y);
 }
 
 void print_char(char c, int colour) {

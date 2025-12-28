@@ -9,5 +9,6 @@ void reverse(char s[]);
 int strlen(char s[]);
 int atoi(char *str);
 uint32_t str_to_hex(char *str);
+void strcpy(char *dest, const char *src);
 
 #endif

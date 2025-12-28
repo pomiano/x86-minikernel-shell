@@ -5,8 +5,8 @@
 #include "../include/shell.h"
 
 
-
 static bool capslock_active = false;
+static bool is_extended = false;
 
 const char ascii_low[] = {
     0,  27, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\b',
@@ -31,6 +31,31 @@ char scancode_to_ascii(uint8_t scancode) {
 
 static void keyboard_callback(registers_t regs) {
     uint8_t scancode = inb(0x60);
+
+    if (scancode == 0xE0) {
+        is_extended = true;
+        return; 
+    }
+
+    if(is_extended) {
+        is_extended = false;
+        switch(scancode) {
+            case 0x48: 
+                handle_keyboard_input(KEY_UP); 
+                break;  
+            case 0x50: 
+                handle_keyboard_input(KEY_DOWN); 
+                break; 
+            case 0x4B: 
+                handle_keyboard_input(KEY_LEFT); 
+                break; 
+            case 0x4D: 
+                handle_keyboard_input(KEY_RIGHT); 
+                break; 
+        }
+        return;
+    }
+
     if(scancode == 0xAA) {
         capslock_active = !capslock_active;
     }

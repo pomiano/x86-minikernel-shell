@@ -73,3 +73,8 @@ uint32_t str_to_hex(char *str) {
     }
     return val;
 }
+
+void strcpy(char *dest, const char *src) {
+    while ((*dest++ = *src++));
+    *dest = '\0';
+}

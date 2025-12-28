@@ -16,6 +16,7 @@ static shell_command_t commands[] = {
 static const int num_commands = sizeof(commands) / sizeof(shell_command_t);
 
 shell_settings settings;
+command_history_t history;
 
 void handle_keyboard_input(char c) {
     if (c == '\n') {
@@ -30,6 +31,25 @@ void handle_keyboard_input(char c) {
             buffer_index--;
             print_char('\b', settings.main_bg_fg); 
         }
+    } else if(c == KEY_DOWN){
+        if(history.view_index < history.count){
+            history.view_index++;
+            if(history.view_index == history.count){
+                clear_current_line(settings.main_bg_fg);
+                key_buffer[0] = '\0';
+                buffer_index = 0;
+            }else {
+                load_history_to_buffer();
+            }
+        }
+
+    } else if(c == KEY_UP) {
+        if(history.view_index>0){
+            history.view_index--;
+            load_history_to_buffer();
+
+        }
+
     } else {
         if (buffer_index < 255) {
             key_buffer[buffer_index++] = c;
@@ -45,6 +65,8 @@ void execute_command(char *input){
     }
     char *cmd_input = input + 1;
     char*arg;
+
+    history_add(cmd_input);
 
     for(int i = 0; cmd_input[i]!='\0'; i++) {
         if(cmd_input[i]==' '){
@@ -70,6 +92,8 @@ void init_shell() {
     settings.success_bg_fg = 0x0A;
     settings.main_bg_fg = 0x0F;
 
+    history.view_index=0;
+    history.count=0;
 
     clear_screen(settings.main_bg_fg);
 }
@@ -208,4 +232,31 @@ void set_user_fg(uint8_t fg_color) {
 void set_main_bg(uint8_t bg_color) {
     uint8_t current_fg = settings.main_bg_fg & 0x0F;
     settings.main_bg_fg = (bg_color << 4) | current_fg;
+}
+
+
+void history_add(char * command) {
+    if(command[0]=='\0')
+        return;
+
+    if(history.count >= HISTORY_SIZE){
+        for(int i=0;i<HISTORY_SIZE-1;i++) {
+            strcpy(history.lines[i],history.lines[i+1]);
+        }
+    } else  
+        history.count++;
+
+    strcpy(history.lines[history.count-1], command);
+
+    history.view_index = history.count;
+}
+
+void load_history_to_buffer() {
+    clear_current_line(settings.main_bg_fg);
+    char *command = history.lines[history.view_index];
+    key_buffer[0] = ':';
+    strcpy(key_buffer + 1, command);
+    buffer_index = strlen(command) + 1;
+
+    print_string(key_buffer, settings.user_bg_fg);
 }
