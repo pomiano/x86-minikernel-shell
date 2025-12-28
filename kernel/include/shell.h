@@ -4,7 +4,7 @@
 #include "../include/drivers/rtc.h"
 #include <stdbool.h>
 
-typedef void (*command_handler_t)();
+typedef void (*command_handler_t)(char*);
 
 typedef struct {
     char* name;
@@ -14,6 +14,8 @@ typedef struct {
 typedef struct {
     uint8_t user_bg_fg;     
     uint8_t system_bg_fg;  
+    uint8_t error_bg_fg;    
+    uint8_t success_bg_fg;
     uint8_t main_bg_fg;
 } shell_settings;
 
@@ -25,9 +27,20 @@ void execute_command(char *input);
 void init_shell();
 
 //commands
-void cmd_help();
-void cmd_clear();
-void cmd_system_time();
+void cmd_help(char *args);
+void cmd_clear(char *args);
+void cmd_system_time(char *args);
+void cmd_set(char * args);
+void cmd_colors();
+
+
+
+//funckje pomocniczne
+void set_system_bg(uint8_t bg_color);
+void set_system_fg(uint8_t fg_color);
+void set_user_bg(uint8_t bg_color);
+void set_user_fg(uint8_t fg_color);
+void set_main_bg(uint8_t bg_color);
 
 
 #endif

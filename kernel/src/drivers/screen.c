@@ -50,7 +50,7 @@ void print_char(char c, int colour) {
 
             }
 
-    }else {
+    } else {
         offset = (cursor_y * 80 + cursor_x) * 2;
         video[offset] = c;
         video[offset+1] = colour;
