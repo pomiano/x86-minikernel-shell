@@ -52,6 +52,7 @@ hello world        // normal input
 | `:set`         | Configure colors (background / text) for user and system messages |
 | `:fetch`       | Displays basic system information                                 |
 | `:help`        | Shows available commands                                          |
+| `:shutdown`    | Shutdown                                                          |
 
 ### 🔹 Real-Time Clock
 
