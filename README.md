@@ -50,6 +50,7 @@ hello world        // normal input
 | `:clear`       | Clears the screen                                                 |
 | `:system-time` | Displays current system time (RTC)                                |
 | `:set`         | Configure colors (background / text) for user and system messages |
+| `:colors`      | Displays available colors                                         |
 | `:fetch`       | Displays basic system information                                 |
 | `:help`        | Shows available commands                                          |
 | `:shutdown`    | Shutdown                                                          |
