@@ -22,6 +22,12 @@ void print_time(int colour) {
     month = (month & 0x0F) + ((month >> 4) * 10);
     year = (year & 0x0F) + ((year >> 4) * 10);
 
+    //UTC != lokalny czas
+    //zima w polsce utc+1
+    //lato w polsce utc+2
+    hour ++;
+    hour = hour % 24;
+
     char sec[3];
     to_string(second, sec);
 

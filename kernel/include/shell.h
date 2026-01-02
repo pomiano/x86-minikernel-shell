@@ -47,8 +47,8 @@ void cmd_clear(char *args);
 void cmd_system_time(char *args);
 void cmd_set(char * args);
 void cmd_colors();
-
-
+void cmd_fetch();
+void cmd_shutdown();
 
 //funckje pomocniczne
 void set_system_bg(uint8_t bg_color);
@@ -59,6 +59,7 @@ void set_main_bg(uint8_t bg_color);
 
 void history_add(char * command);
 void load_history_to_buffer();
+
 
 
 #endif

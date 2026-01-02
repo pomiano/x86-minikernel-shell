@@ -7,7 +7,7 @@
 #define START_ADDRESS 0xB8000
 #define MAX_ROWS 25
 #define MAX_COLS 80
-
+#define TAB_SPACES 4
 
 typedef struct {
     bool cursor_enabled;

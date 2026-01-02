@@ -10,7 +10,9 @@ static shell_command_t commands[] = {
     {"clear",  cmd_clear},
     {"system-time", cmd_system_time},
     {"set", cmd_set},
-    {"colors", cmd_colors}
+    {"colors", cmd_colors},
+    {"fetch", cmd_fetch},
+    {"shutdown", cmd_shutdown}
 };
 
 static const int num_commands = sizeof(commands) / sizeof(shell_command_t);
@@ -31,6 +33,11 @@ void handle_keyboard_input(char c) {
             buffer_index--;
             print_char('\b', settings.main_bg_fg); 
         }
+    } else if(c == '\t'){
+        for(int i = 0;i<TAB_SPACES;i++){
+            key_buffer[buffer_index++] = ' ';
+        }
+        print_char('\t', settings.user_bg_fg);
     } else if(c == KEY_DOWN){
         if(history.view_index < history.count){
             history.view_index++;
@@ -95,7 +102,9 @@ void init_shell() {
     history.view_index=0;
     history.count=0;
 
-    clear_screen(settings.main_bg_fg);
+    print_string("Witaj w milOS\n", settings.system_bg_fg);
+    print_string("Uzyj ':help ', zeby poznac dostepne komendy\n", settings.system_bg_fg);
+
 }
 
 
@@ -119,7 +128,6 @@ void cmd_system_time(char *args){
 }
 
 
-//TODO
 void cmd_set(char * args) {
     if (args == 0 || args[0] == '\0') {
         print_string("Ta funckja wymaga argumentow! Wpisz ':set -h', zeby dowiedziec sie wiecej", settings.error_bg_fg);
@@ -205,6 +213,23 @@ void cmd_colors() {
         print_string(" ", settings.system_bg_fg);
     }
     print_string("\n", settings.system_bg_fg);
+}
+
+void cmd_fetch(){
+    uint8_t logo_col = 0x03; 
+    uint8_t text_col = 0x0F; 
+    
+    print_string("\n", 0);
+    print_string("         __  __   \n", logo_col);
+    print_string("      \\ |  \\/  | /      ", logo_col);  print_string("OS:      milOS v1.0\n", text_col);
+    print_string("       \\| |\\/| |/       ", logo_col);  print_string("Date:    2025\n", text_col);
+    print_string("       /| |  | |\\       ", logo_col);   print_string("Author:  Milosz Pomianowski\n", text_col);
+    print_string("      / |_|  |_| \\      ", logo_col);   print_string("Github:  https://github.com/pomiano\n", text_col);
+    print_string("\n", 0);
+}
+
+void cmd_shutdown() {
+    outw(0x604, 0x2000); //tylko w qemu! nie dziala na prawdziwym sprzecie!
 }
 
 // funkcje pomocnicze

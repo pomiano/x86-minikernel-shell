@@ -4,6 +4,8 @@
 int cursor_x = 0; // 0 - 79
 int cursor_y = 0; // 0 - 24
 
+
+
 screen_settings scr_settings;
 
 void clear_screen(int colour) {
@@ -52,6 +54,14 @@ void print_char(char c, int colour) {
 
             }
 
+    } else if(c=='\t'){
+        for(int i=0;i<TAB_SPACES;i++) {
+            offset = (cursor_y * 80 + cursor_x) * 2;
+            video[offset] = ' ';
+            video[offset+1] = colour;
+
+            cursor_x++;
+        }
     } else {
         offset = (cursor_y * 80 + cursor_x) * 2;
         video[offset] = c;
@@ -81,6 +91,7 @@ void print_string(const char* string, int kolor) {
 
 
 void init_screen() {
+    clear_screen(0x0F);
     scr_settings.cursor_enabled = true;
     enable_cursor(14,15);
 }
