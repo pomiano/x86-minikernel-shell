@@ -62,13 +62,8 @@ hello world        // normal input
 
 ## 🖥️ Screenshots
 
-> *(Place screenshots here)*
-
-```text
-[ Screenshot: Bootloader Stage 1 ]
-[ Screenshot: Kernel Shell ]
-[ Screenshot: Command History Navigation ]
-```
+![Help Output](screens/help.png)  
+![system-time and fetch](screens/time-fetch.png)
 
 ---
 
