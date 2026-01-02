@@ -15,7 +15,7 @@ void clear_screen(int colour) {
         video[i+1] = colour;
     } 
     cursor_x = 0;
-    cursor_y = 0;
+    cursor_y = -1;
     update_cursor(cursor_x, cursor_y);
 }
 
